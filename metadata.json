@@ -1,0 +1,6 @@
+{
+  "name": "iQOO 144Hz Unlocker",
+  "description": "Принудительное включение 144 Гц и управление частотой обновления экрана для iQOO и vivo устройств через Shizuku API.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

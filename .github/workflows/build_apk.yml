@@ -1,0 +1,128 @@
+name: Build and Release Android APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build APK & Diagnostic Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java Development Kit (JDK) 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Grant Execute Permission for Gradle Wrapper
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+          else
+            echo "Generating Gradle wrapper..."
+            gradle wrapper --gradle-version 8.11.1
+            chmod +x ./gradlew
+          fi
+
+      - name: Prepare Dummy Environment & Keystore
+        run: |
+          echo "Setting up build environment files..."
+          touch .env
+          echo "GEMINI_API_KEY=dummy_key_for_ci_build" >> .env
+          
+          # If debug.keystore.base64 exists, restore debug.keystore
+          if [ -f "debug.keystore.base64" ]; then
+            base64 -d debug.keystore.base64 > debug.keystore || true
+          fi
+          
+          # If debug.keystore is still missing, generate one
+          if [ ! -f "debug.keystore" ]; then
+            keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+
+      - name: Run Unit Tests with Diagnostics
+        id: unit_tests
+        run: |
+          echo "Running unit and Robolectric tests..."
+          ./gradlew :app:testDebugUnitTest --stacktrace --info
+        continue-on-error: true
+
+      - name: Build Debug APK
+        id: build_debug_apk
+        run: |
+          echo "Starting assembleDebug..."
+          ./gradlew :app:assembleDebug --stacktrace
+        continue-on-error: false
+
+      - name: Capture Build Failure Diagnostics
+        if: failure()
+        run: |
+          echo "::error::Gradle build failed. Printing detailed diagnostics..."
+          echo "=== Gradle Version ==="
+          ./gradlew --version || true
+          echo "=== Java Version ==="
+          java -version || true
+          echo "=== Environment Info ==="
+          uname -a
+          echo "=== Directory Layout ==="
+          ls -la
+          echo "=== Inspecting Task Failures ==="
+          ./gradlew :app:assembleDebug --dry-run || true
+
+      - name: Locate Built APK
+        id: find_apk
+        run: |
+          echo "Searching for built APK files..."
+          find app/build/outputs/apk -name "*.apk" -type f -exec ls -la {} + || true
+          
+          APK_PATH=$(find app/build/outputs/apk/debug -name "*.apk" -type f | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            APK_PATH=$(find app/build/outputs/apk -name "*.apk" -type f | head -n 1)
+          fi
+          
+          if [ -n "$APK_PATH" ]; then
+            echo "Found APK: $APK_PATH"
+            echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
+            
+            # Create a clean release directory
+            mkdir -p release-output
+            cp "$APK_PATH" release-output/iQOO_144Hz_Unlocker.apk
+          else
+            echo "::error::No APK file found after successful build!"
+            exit 1
+          fi
+
+      - name: Upload APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iQOO-144Hz-Unlocker-APK
+          path: release-output/*.apk
+          retention-days: 14
+
+      - name: Create GitHub Release (On Tag Push or Dispatch)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-output/*.apk
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
