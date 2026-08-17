@@ -2,8 +2,6 @@ package com.example
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
-import com.example.shizuku.ShizukuState
-import com.example.ui.MinimalHeader
 import com.example.ui.theme.MyApplicationTheme
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -22,17 +20,10 @@ class GreetingScreenshotTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   @Test
-  fun minimal_header_screenshot() {
+  fun fps_unlocker_screen_screenshot() {
     composeTestRule.setContent {
       MyApplicationTheme {
-        MinimalHeader(
-          shizukuState = ShizukuState(isRunning = true, isPermissionGranted = true),
-          displayFps = 144f,
-          is144Active = true,
-          isExecuting = false,
-          onHelpClick = {},
-          onRefresh = {}
-        )
+        HyperOsScreen()
       }
     }
 

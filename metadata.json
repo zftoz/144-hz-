@@ -1,6 +1,6 @@
 {
-  "name": "iQOO 144Hz Unlocker",
-  "description": "Принудительное включение 144 Гц и управление частотой обновления экрана для iQOO и vivo устройств через Shizuku API.",
+  "name": "FPS Unlocker",
+  "description": "Ярлык для быстрого открытия настроек системных сервисов Powerkeeper и Joyose в HyperOS/MIUI для очистки данных и разблокировки максимальной частоты кадров (FPS).",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
