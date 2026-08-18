@@ -1,6 +1,6 @@
 {
   "name": "FPS Unlocker",
-  "description": "Ярлык для быстрого открытия настроек системных сервисов Powerkeeper и Joyose в HyperOS/MIUI для очистки данных и разблокировки максимальной частоты кадров (FPS).",
+  "description": "Универсальный разблокировщик FPS: форсирование 144 Гц на iQOO/vivo через Shizuku и быстрый сброс ограничений Powerkeeper/Joyose в HyperOS/MIUI.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

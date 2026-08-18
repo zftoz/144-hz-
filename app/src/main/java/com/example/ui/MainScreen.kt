@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -110,19 +111,17 @@ fun MainScreen(viewModel: MainViewModel) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = DarkBg,
-        modifier = Modifier
-            .fillMaxSize()
-            .navigationBarsPadding()
+        modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 20.dp),
-            contentPadding = PaddingValues(top = 20.dp, bottom = 40.dp),
+            contentPadding = PaddingValues(top = 10.dp, bottom = 40.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 1. Sleek Minimal Header
+            // 1. Minimal Header
             item {
                 MinimalHeader(
                     shizukuState = uiState.shizukuState,
@@ -133,7 +132,7 @@ fun MainScreen(viewModel: MainViewModel) {
                 )
             }
 
-            // 2. Shizuku Auth Banner (Only if permission is not granted)
+            // 2. Shizuku Auth Banner
             if (!uiState.shizukuState.isPermissionGranted) {
                 item {
                     ShizukuAuthBanner(
@@ -155,7 +154,7 @@ fun MainScreen(viewModel: MainViewModel) {
                 )
             }
 
-            // 4. Primary Action Controls
+            // 4. Primary Action Controls (Vivo/iQOO 144FPS Unlocker commands)
             item {
                 ActionControls(
                     isReady = uiState.shizukuState.isPermissionGranted,
@@ -167,7 +166,7 @@ fun MainScreen(viewModel: MainViewModel) {
                 )
             }
 
-            // 5. Optional Minimal Shell Command Runner (Collapsible)
+            // 5. Shell Command Runner (Collapsible)
             if (showShellInput) {
                 item {
                     MinimalShellSection(
@@ -200,7 +199,7 @@ fun MinimalHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp)
+            .padding(vertical = 4.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -213,7 +212,7 @@ fun MinimalHeader(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "144 Hz Unlocker",
+                        text = "iQOO 144 FPS Unlocker",
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = (-0.5).sp
@@ -231,7 +230,7 @@ fun MinimalHeader(
                 }
 
                 Text(
-                    text = "iQOO display frequency override",
+                    text = "Force 144Hz override (peak/user/min = 1)",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextMuted
                 )
@@ -257,40 +256,6 @@ fun MinimalHeader(
                             ),
                             color = TextPrimary,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                    }
-                }
-
-                // Shizuku Status Pill
-                val isReady = shizukuState.isRunning && shizukuState.isPermissionGranted
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = if (isReady) StatusActiveBg else StatusInactiveBg,
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        if (isReady) DarkBorder else DarkBorderSubtle
-                    ),
-                    modifier = Modifier.testTag("shizuku_status_pill")
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .clip(CircleShape)
-                                .background(if (isReady) TextPrimary else TextMuted)
-                        )
-                        Text(
-                            text = if (isReady) "ADB" else "NO ADB",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                letterSpacing = 0.5.sp
-                            ),
-                            color = if (isReady) StatusActiveText else StatusInactiveText
                         )
                     }
                 }
@@ -341,18 +306,33 @@ fun ShizukuAuthBanner(
             modifier = Modifier.padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(
-                text = "Требуется доступ Shizuku",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                color = TextPrimary
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.VpnKey,
+                    contentDescription = null,
+                    tint = TextSecondary,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = "Доступ Shizuku (ADB API)",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = TextPrimary
+                )
+            }
+
             Text(
                 text = shizukuState.statusDescription,
                 style = MaterialTheme.typography.bodySmall,
                 color = TextSecondary
             )
 
-            if (shizukuState.isRunning && !shizukuState.isPermissionGranted) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Button(
                     onClick = onRequestPermission,
                     colors = ButtonDefaults.buttonColors(
@@ -361,16 +341,16 @@ fun ShizukuAuthBanner(
                     ),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp)
+                        .weight(1f)
+                        .height(42.dp)
                         .testTag("request_permission_button")
                 ) {
                     Text(
-                        text = "Предоставить доступ",
+                        text = "Запросить доступ",
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                     )
                 }
-            } else {
+
                 OutlinedButton(
                     onClick = onOpenShizuku,
                     colors = ButtonDefaults.outlinedButtonColors(
@@ -379,13 +359,13 @@ fun ShizukuAuthBanner(
                     border = androidx.compose.foundation.BorderStroke(1.dp, DarkBorder),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp)
+                        .weight(1f)
+                        .height(42.dp)
                         .testTag("open_shizuku_button")
                 ) {
                     Text(
                         text = "Открыть Shizuku",
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
                     )
                 }
             }
@@ -416,7 +396,7 @@ fun LiveSettingsCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "ПАРАМЕТРЫ СИСТЕМЫ",
+                    text = "ПАРАМЕТРЫ СИСТЕМЫ (SETTINGS SYSTEM)",
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
@@ -577,7 +557,7 @@ fun ActionControls(
                     modifier = Modifier.size(18.dp)
                 )
                 Text(
-                    text = if (is144Active) "144 Гц Активен (Value = 1)" else "Активировать 144 Гц (Force 144Hz)",
+                    text = if (is144Active) "144 Гц Активен (Все ключи = 1)" else "Активировать 144 Гц (Force 144Hz)",
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
                 )
             }
@@ -721,14 +701,14 @@ fun MinimalHelpDialog(onDismiss: () -> Unit) {
         textContentColor = TextSecondary,
         title = {
             Text(
-                text = "О разблокировке 144 Гц",
+                text = "О разблокировке 144 Гц на iQOO / vivo",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "• На смартфонах vivo / iQOO значение 1 в системных настройках 'peak_refresh_rate' и 'user_refresh_rate' переопределяет частоту экрана на максимальную (144 Гц) во всех поддерживаемых приложениях и играх.",
+                    text = "• На смартфонах vivo / iQOO значение 1 в системных настройках 'peak_refresh_rate', 'user_refresh_rate' и 'min_refresh_rate' переопределяет частоту экрана на максимальную (144 Гц) во всех поддерживаемых приложениях и играх (метод VivoIQOO144FPSUnlocker).",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextSecondary
                 )
@@ -738,7 +718,7 @@ fun MinimalHelpDialog(onDismiss: () -> Unit) {
                     color = TextSecondary
                 )
                 Text(
-                    text = "• Кнопка 'Сбросить на стандарт' возвращает стандартные настройки или очищает ключи для возврата к vivo Smart Switch.",
+                    text = "• Кнопка 'Сбросить на стандарт' возвращает стандартные настройки или очищает ключи для возврата к заводскому Smart Switch vivo.",
                     style = MaterialTheme.typography.bodySmall,
                     color = TextSecondary
                 )

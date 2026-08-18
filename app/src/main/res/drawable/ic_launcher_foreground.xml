@@ -1,8 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:width="66dp"
-        android:height="66dp"
-        android:drawable="@drawable/iqoo_hz_icon_1786966555541"
-        android:gravity="center" />
-</layer-list>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Center Bolt / 144Hz Speed Icon in Pure Vector SVG -->
+    <!-- Outer energy ring -->
+    <path
+        android:strokeColor="#383844"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M38,26 C42.8,24.2 48.2,23 54,23 C71.1,23 85,36.9 85,54 C85,71.1 71.1,85 54,85 C36.9,85 23,71.1 23,54 C23,48.2 24.2,42.8 26,38" />
+
+    <!-- Lightning Bolt (Sharp geometric power glyph) -->
+    <path
+        android:fillColor="#F4F4F6"
+        android:pathData="M57,28 L37,56 L51,56 L47,80 L71,48 L55,48 Z" />
+
+    <!-- Speed Lines / Frequency ticks -->
+    <path
+        android:strokeColor="#A1A1AA"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M69,32 L74,27 M77,44 L83,42 M76,64 L82,67" />
+</vector>

@@ -82,16 +82,30 @@ class ShizukuManager(private val context: Context) {
         }
     }
 
-    fun requestPermission() {
-        if (!isRunning()) {
-            return
-        }
-        try {
-            if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-                Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
+    /**
+     * Запрос разрешения через официальный API Shizuku.
+     * Если Shizuku запущен и разрешение еще не выдано, открывается системное диалоговое окно подтверждения.
+     * Если Shizuku не запущен, открывается само приложение Shizuku.
+     */
+    fun requestPermission(): Boolean {
+        updateStatus()
+        if (isRunning()) {
+            return try {
+                if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                    updateStatus()
+                    true
+                } else {
+                    Shizuku.requestPermission(SHIZUKU_PERMISSION_REQUEST_CODE)
+                    true
+                }
+            } catch (e: Throwable) {
+                e.printStackTrace()
+                openShizukuApp()
+                false
             }
-        } catch (e: Throwable) {
-            e.printStackTrace()
+        } else {
+            openShizukuApp()
+            return false
         }
     }
 
@@ -105,8 +119,8 @@ class ShizukuManager(private val context: Context) {
         }
 
         val description = when {
-            !running -> "Служба Shizuku не запущена"
-            !permissionGranted -> "Требуется разрешение Shizuku"
+            !running -> "Служба Shizuku не запущена (запустите через Wireless ADB / ПК)"
+            !permissionGranted -> "Служба Shizuku запущена, требуется предоставить доступ"
             else -> "Shizuku ADB активен (v$version)"
         }
 
