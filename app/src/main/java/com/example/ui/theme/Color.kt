@@ -2,26 +2,31 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Minimalist Dark Monochrome & Graphite Palette (No colorful rainbow system colors)
-val DarkBg = Color(0xFF0C0C0E)
-val DarkSurface = Color(0xFF16161A)
-val DarkSurfaceElevated = Color(0xFF1E1E24)
-val DarkSurfaceVariant = Color(0xFF26262E)
-val DarkBorder = Color(0xFF2B2B34)
-val DarkBorderSubtle = Color(0xFF202026)
+// Minimalist Dark Cyber-Graphite Palette (Balanced, non-glaring, unified)
+val DarkBg = Color(0xFF090A0F)
+val DarkSurface = Color(0xFF12141C)
+val DarkSurfaceElevated = Color(0xFF1A1D28)
+val DarkSurfaceVariant = Color(0xFF222634)
+val DarkBorder = Color(0xFF262A38)
+val DarkBorderSubtle = Color(0xFF191C26)
 
-val TextPrimary = Color(0xFFF4F4F6)
-val TextSecondary = Color(0xFFA1A1AA)
-val TextMuted = Color(0xFF71717A)
+val AccentPrimary = Color(0xFF38BDF8) // Crisp Electric Cyan for 144Hz indicators & active states
+val AccentPrimaryGlow = Color(0x2238BDF8)
+val AccentSuccess = Color(0xFF34D399) // Clean Emerald for active status
+val AccentWarning = Color(0xFFFBBF24)
 
-val ButtonPrimaryBg = Color(0xFFF4F4F6)
-val ButtonPrimaryText = Color(0xFF0C0C0E)
+val TextPrimary = Color(0xFFF1F5F9)
+val TextSecondary = Color(0xFF94A3B8)
+val TextMuted = Color(0xFF64748B)
 
-val ButtonSecondaryBg = Color(0xFF1A1A20)
-val ButtonSecondaryBorder = Color(0xFF34343E)
-val ButtonSecondaryText = Color(0xFFE4E4E7)
+val ButtonPrimaryBg = Color(0xFFF1F5F9)
+val ButtonPrimaryText = Color(0xFF090A0F)
 
-val StatusActiveBg = Color(0xFF24242C)
-val StatusActiveText = Color(0xFFF4F4F6)
-val StatusInactiveBg = Color(0xFF18181E)
-val StatusInactiveText = Color(0xFF71717A)
+val ButtonSecondaryBg = Color(0xFF161922)
+val ButtonSecondaryBorder = Color(0xFF2E3446)
+val ButtonSecondaryText = Color(0xFFE2E8F0)
+
+val StatusActiveBg = Color(0xFF0E2A24)
+val StatusActiveText = Color(0xFF34D399)
+val StatusInactiveBg = Color(0xFF1E202B)
+val StatusInactiveText = Color(0xFF94A3B8)

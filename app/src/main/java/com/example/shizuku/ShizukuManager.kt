@@ -13,6 +13,17 @@ import rikka.shizuku.Shizuku
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
+/**
+ * Коллбэк для обработки ответа пользователя при запросе разрешения Shizuku
+ */
+interface ShizukuPermissionCallback {
+    fun onPermissionGranted()
+    fun onPermissionDenied()
+}
+
+/**
+ * Состояние сервиса Shizuku
+ */
 data class ShizukuState(
     val isRunning: Boolean = false,
     val isPermissionGranted: Boolean = false,
@@ -30,14 +41,27 @@ class ShizukuManager(private val context: Context) {
     private val _state = MutableStateFlow(ShizukuState())
     val state: StateFlow<ShizukuState> = _state.asStateFlow()
 
+    private var permissionCallback: ShizukuPermissionCallback? = null
+
+    // 3. Обработка ответа: слушатель результата запроса разрешения
     private val permissionListener = Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
         if (requestCode == SHIZUKU_PERMISSION_REQUEST_CODE) {
+            val isGranted = (grantResult == PackageManager.PERMISSION_GRANTED)
+            if (isGranted) {
+                permissionCallback?.onPermissionGranted()
+            } else {
+                permissionCallback?.onPermissionDenied()
+            }
             updateStatus()
         }
     }
 
+    // Слушатели жизненного цикла связки Binder
     private val binderReceivedListener = Shizuku.OnBinderReceivedListener {
         updateStatus()
+        if (isPermissionGranted()) {
+            permissionCallback?.onPermissionGranted()
+        }
     }
 
     private val binderDeadListener = Shizuku.OnBinderDeadListener {
@@ -65,6 +89,7 @@ class ShizukuManager(private val context: Context) {
         }
     }
 
+    // 1. Проверка статуса: запущен ли сервис Shizuku в системе
     fun isRunning(): Boolean {
         return try {
             Shizuku.pingBinder()
@@ -73,6 +98,7 @@ class ShizukuManager(private val context: Context) {
         }
     }
 
+    // Проверка наличия выданного разрешения
     fun isPermissionGranted(): Boolean {
         if (!isRunning()) return false
         return try {
@@ -82,16 +108,15 @@ class ShizukuManager(private val context: Context) {
         }
     }
 
-    /**
-     * Запрос разрешения через официальный API Shizuku.
-     * Если Shizuku запущен и разрешение еще не выдано, открывается системное диалоговое окно подтверждения.
-     * Если Shizuku не запущен, открывается само приложение Shizuku.
-     */
-    fun requestPermission(): Boolean {
+    // 2. Запрос разрешений: диалог через Shizuku API
+    fun requestPermission(callback: ShizukuPermissionCallback? = null): Boolean {
+        this.permissionCallback = callback
         updateStatus()
+
         if (isRunning()) {
             return try {
                 if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                    callback?.onPermissionGranted()
                     updateStatus()
                     true
                 } else {
@@ -100,10 +125,12 @@ class ShizukuManager(private val context: Context) {
                 }
             } catch (e: Throwable) {
                 e.printStackTrace()
+                callback?.onPermissionDenied()
                 openShizukuApp()
                 false
             }
         } else {
+            callback?.onPermissionDenied()
             openShizukuApp()
             return false
         }
@@ -134,9 +161,7 @@ class ShizukuManager(private val context: Context) {
         return newState
     }
 
-    /**
-     * Выполняет команду через Shizuku.newProcess от имени ADB и возвращает результат
-     */
+    // 4. Выполнение команды: отправка ADB shell команды через процесс Shizuku Binder
     fun runShell(cmd: String): String {
         if (!isRunning()) {
             return "Error: Shizuku service is not running"
